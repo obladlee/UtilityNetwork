@@ -1,6 +1,8 @@
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as PLOT
+import pytorch
+
 np.random.seed(0)
 sns.set()
 uniform_data = np.random.rand(10, 12)
