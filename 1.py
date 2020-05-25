@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as PLOT
 import pytorch
 
+import tensorflow as tf
 np.random.seed(0)
 sns.set()
 uniform_data = np.random.rand(10, 12)
