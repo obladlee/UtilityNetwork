@@ -26,3 +26,14 @@ stypeDict = {"0":"Unknown","1":"变压器"，"2":""}
 for code in stypeDict：
     arcpy.AddSubtype_management("infeature",code,stypeDict[code])
 arcpy.SetDefaultSubtype_management("infeature",4)
+
+#创建属性域,添加域值，分配给字段
+arcpy.CreateDomain_management("gdb",domain_name=,domain_description=,field_type=short,domain_type=coded,)
+domDict = {
+    "1":"y=高压","2":"低压","3":"中压"
+}
+for code in domDict:
+    arcpy.AddCodedValueToDomain_management(gdb,domName,code,domDict[code])
+arcpy.AssignDomainToField_management(infeatures,inField,domname)
+# 添加终端
+arcpy.AddTerminalConfiguration_un()
