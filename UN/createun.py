@@ -10,23 +10,22 @@
 
 # 创建utility network
 import arcpy
-import sys
+import untools
 
 arcpy.env.preserveGlobalIds = True
-arcpy.env.workspace = "E:/ArcGIS/pro_Projects/Electric_un/Electric_un.gdb/SYSTEM"
+arcpy.env.workspace = "E:/ArcGIS/pro_Projects/Eleun/Eleun.gdb"
+
 #设置局部变量
-fgdb = "E:/ArcGIS/pro_Projects/Electric_un/Electric_un.gdb"
-service_territory = "E:/ArcGIS/pro_Projects/Electric_un/Electric_un.gdb/Service_Area"
+fgdb = "E:/ArcGIS/pro_Projects/Eleun/Eleun.gdb"
+service_territory = "E:/ArcGIS/pro_Projects/Eleun/Eleun.gdb/Service_Area"
 dataset = "SYSTEM"
 network_name = "ElectricNetwork"
-elebyq = "E:/ArcGIS/pro_Projects/Electric_un/ele变压器"
-elecsx = "E:/ArcGIS/pro_Projects/Electric_un/ele传输线"
-'''
-arcpy.pt.StageUtilityNetwork("E:/ArcGIS/pro_Projects/Electric_un/Electric_un.gdb",service_territory,dataset,network_name) 
+# elebyq = "E:/ArcGIS/pro_Projects/Eleun/ele变压器"
+# elecsx = "E:/ArcGIS/pro_Projects/Eleun/ele传输线"
 
-'''
+arcpy.pt.StageUtilityNetwork(fgdb,service_territory,dataset,network_name) 
 # try:
-# 创建域网络,创建域出错几次，再次运行代码，会重新创建un，且以un_数字命名要素
+# 创建域网络,创建域出错几次，再次运行代码，会重新创建un，且以un_1/2..命名要素
 arcpy.AddDomainNetwork_un("ElectricNetwork","Electric","PARTITIONED","SOURCE","Electric_alias")
 # except arcpy.ExecuteError:
 #     arcpy.AddError(arcpy.GetMessage(2))
