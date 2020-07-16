@@ -27,6 +27,7 @@ def importallsheets(in_excel,out_gdb):
     print('converting{} to {}'.format(sheet,out_table))
     # 转换各个工作表
     arcpy.ExcelToTable_conversion(in_excel,out_table,sheet)
+    
 
 def displayxy()
 
