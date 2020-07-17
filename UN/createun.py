@@ -23,10 +23,16 @@ network_name = "ElectricNetwork"
 # elebyq = "E:/ArcGIS/pro_Projects/Eleun/ele变压器"
 # elecsx = "E:/ArcGIS/pro_Projects/Eleun/ele传输线"
 
+# 创建un和结构网络
 arcpy.pt.StageUtilityNetwork(fgdb,service_territory,dataset,network_name) 
+
+'''
+创建域网络,创建域出错几次，再次运行代码，会重新创建un，且以un_1/2..命名要素。
+adddomainnetwork输入是dataset/un,单独的un无法识别，且报错error000732
+域网络名称与别名最好一致,在指定属性域给字段环节,无法识别域网络要素名称,可以识别alias
+'''
 # try:
-# 创建域网络,创建域出错几次，再次运行代码，会重新创建un，且以un_1/2..命名要素
-arcpy.AddDomainNetwork_un("ElectricNetwork","Electric","PARTITIONED","SOURCE","Electric_alias")
+arcpy.AddDomainNetwork_un("SYSTEM/ElectricNetwork","Electric","PARTITIONED","SOURCE","Electric")
 # except arcpy.ExecuteError:
 #     arcpy.AddError(arcpy.GetMessage(2))
 # except:
@@ -34,26 +40,27 @@ arcpy.AddDomainNetwork_un("ElectricNetwork","Electric","PARTITIONED","SOURCE","E
 #     print(e.args[0])
     
 # 添加子类型
-arcpy.SetSubtypeField_management("ElectricDevice","Asset group")
-stypeDict = {"0":"Unknown","1":"变压器"}
+# arcpy.SetSubtypeField_management("ElectricDevice","Asset group")不必要,会报错error002140.un默认指定asset group为子类型字段.
+# 创建域网络默认创建Unknown子类型,无需添加
+stypeDict = {"1":"变压器"}
 for code in stypeDict:
     arcpy.AddSubtype_management("ElectricDevice",code,stypeDict[code])
 arcpy.SetDefaultSubtype_management("ElectricDevice",1)
 
-arcpy.SetSubtypeField_management("ElectricLine","Asset group")
-stypeDict1 = {"0":"Unknown","1":"传输线"}
+stypeDict1 = {"1":"传输线"}
 for code in stypeDict1:
-    arcpy.addSubtype_management("ElectricLine",code,stypeDict1[code])
+    arcpy.AddSubtype_management("ElectricLine",code,stypeDict1[code])
 arcpy.SetDefaultSubtype_management("ElectricLine",1)
 
-#创建属性域,添加域值，分配给字段
+#创建属性域,添加域值,分配给字段
 #创建变压器属性域
 arcpy.CreateDomain_management(fgdb,"变压器电压","变压器电压类型","SHORT","CODED")
 domDict = {
-    "1":"y=高压","2":"中压"
+    "1":"高压","2":"中压"
 }
 for code in domDict:
     arcpy.AddCodedValueToDomain_management(fgdb,"变压器电压",code,domDict[code])
+# 指定属性域报错error000356,
 arcpy.AssignDomainToField_management("ElectricDevice","Asset type","变压器电压")
 
 #创建传输线属性域
@@ -63,7 +70,7 @@ domDict1 = {
 }
 for code in domDict:
     arcpy.AddCodedValueToDomain_management(fgdb,"传输线电压",code,domDict[code])
-arcpy.AssignDomainToField_management("ElectricLine","Asset type","变压器电压")
+arcpy.AssignDomainToField_management("ElectricLine","Asset type","传输线电压")
 
 # 添加终端
 arcpy.AddTerminalConfiguration_un(network_name,"config1","DIRECTIONAL",'A true;B true;C false','Top A-B;Bottom A-C','Bottom')
