@@ -10,7 +10,6 @@
 
 # 创建utility network
 import arcpy
-import untools
 
 arcpy.env.preserveGlobalIds = True
 arcpy.env.workspace = "E:/ArcGIS/pro_Projects/Eleun/Eleun.gdb"
@@ -54,23 +53,23 @@ arcpy.SetDefaultSubtype_management("ElectricLine",1)
 
 #创建属性域,添加域值,分配给字段
 #创建变压器属性域
-arcpy.CreateDomain_management(fgdb,"变压器电压","变压器电压类型","SHORT","CODED")
+arcpy.CreateDomain_management(fgdb,"变压器电压","变压器电压类型","TEXT","CODED")
 domDict = {
     "1":"高压","2":"中压"
 }
 for code in domDict:
     arcpy.AddCodedValueToDomain_management(fgdb,"变压器电压",code,domDict[code])
 # 指定属性域报错error000356,
-arcpy.AssignDomainToField_management("ElectricDevice","Asset type","变压器电压")
+arcpy.AssignDomainToField_management("ElectricDevice","Asset type","变压器电压","")
 
 #创建传输线属性域
-arcpy.CreateDomain_management(fgdb,"传输线电压","传输线电压类型","SHORT","CODED")
+arcpy.CreateDomain_management(fgdb,"传输线电压","传输线电压类型","TEXT","CODED")
 domDict1 = {
     "1":"高压"
 }
 for code in domDict:
     arcpy.AddCodedValueToDomain_management(fgdb,"传输线电压",code,domDict[code])
-arcpy.AssignDomainToField_management("ElectricLine","Asset type","传输线电压")
+arcpy.AssignDomainToField_management("ElectricLine","Asset type","传输线电压","")
 
 # 添加终端
 arcpy.AddTerminalConfiguration_un(network_name,"config1","DIRECTIONAL",'A true;B true;C false','Top A-B;Bottom A-C','Bottom')
