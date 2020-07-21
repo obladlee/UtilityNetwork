@@ -16,7 +16,7 @@ arcpy.env.workspace = "E:/ArcGIS/pro_Projects/Eleun/Eleun.gdb"
 
 #设置局部变量
 fgdb = "E:/ArcGIS/pro_Projects/Eleun/Eleun.gdb"
-service_territory = "E:/ArcGIS/pro_Projects/Eleun/Eleun.gdb/Service_Area"
+service_territory = "E:/ArcGIS/pro_Projects/ele.gdb/Service_Area"
 dataset = "SYSTEM"
 network_name = "ElectricNetwork"
 # elebyq = "E:/ArcGIS/pro_Projects/Eleun/ele变压器"
