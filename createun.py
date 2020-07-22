@@ -40,7 +40,7 @@ for in_table, subtypes in domainNetSubtypes.items():  # items()是一个python�
 
 #创建属性域,添加域值,分配给字段
 #创建变压器属性域
-codedDomains = {'电压': ('电压类型', ('Unknown','高压','中压'))}
+codedDomains = {'电压': ('电压类型', ('Unknown','高压','低压'))}
 assignDomainField = [('ElectricDevice', 'Asset type', '电压', '1'), ('ElectricLine', 'Asset type', '电压', None)]
 for codedDomainName, content in codedDomains.items():
     arcpy.CreateDomain_management(fgdb, codedDomainName, content[0],"SHORT","CODED")
