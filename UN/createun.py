@@ -114,3 +114,4 @@ arcpy.SetSubnetworkDefinition_un(network_name,"Electric","高压区","SUPPORT_DI
 arcpy.Append_management(elebyq,"ElectricDevice","TEXT","变压器")
 arcpy.Append_management(elecsx,"ElectricLine","TEXT","传输线")
 
+
