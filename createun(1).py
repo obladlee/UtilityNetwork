@@ -37,7 +37,8 @@ domainNetSubtypes = {'ElectricDevice':{"1":"变压器"},'ElectricLine':{"1":"传
 for in_table, subtypes in domainNetSubtypes.items():  # items()是一个python字典的小技巧，同时返回key和value
     for code, name in subtypes.items():
         arcpy.AddSubtype_management(os.path.join(fgdb, dataset, in_table), code, name)
-    arcpy.SetDefaultSubtype_management(in_table, 1)  # 如果默认子类不是1，这里还需要额外的输入参数
+    arcpy.SetDefaultSubtype_management(os.path.join(
+        fgdb, dataset, in_table), 1)  # 如果默认子类不是1，这里还需要额外的输入参数
 
 #创建属性域,添加域值,分配给字段
 # 属性域名称:(描述，(从0开始各code的描述)) 注意ASSETTYPE，不要用别名会报错无效的属性域类型
@@ -53,6 +54,16 @@ for domainField in assignDomainField:
     arcpy.AssignDefaultToField_management(domainField[0],domainField[1],1,domainField[3])
 
 # ---------------------改到这里
+# 添加终端
+terConfig = {"DIRECTIONAL": ['A true;B true;C false','Top A-B;Bottom A-C', 'Bottom'], "DIRECTIONAL": ['A true;B true;C false','Top A-B;Bottom A-C','Top']}
+ter = {"EletricDevice":["变压器","高压"], "ElectricDevice":["变压器", "中压"]}
+for i, name in enumerate(terConfig):
+    arcpy.AddTerminalConfiguration_un(un,"'config'+str(i)",name[0],name[1],name[2])
+    for i, types in ter.items():
+        arcpy.SetTerminalConfiguration_un(un,domainNet,i,types[0],types[1],"'config'+str(i)")
+
+# 添加网络分组
+
 
 # # 添加终端
 # arcpy.AddTerminalConfiguration_un(un,"config1","DIRECTIONAL",'A true;B true;C false','Top A-B;Bottom A-C','Bottom')
