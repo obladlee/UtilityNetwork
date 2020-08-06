@@ -21,14 +21,13 @@ dataset = "SYSTEM"
 un = "ElectricNetwork"
 domainNet,domainNetAlias = "Electric",'电网'
 
-# elebyq = "E:/ArcGIS/pro_Projects/Eleun/ele变压器"
-# elecsx = "E:/ArcGIS/pro_Projects/Eleun/ele传输线"
-
 arcpy.env.workspace = os.path.join(fgdb, dataset)
+
 # 创建un和结构网络
 arcpy.CreateFileGDB_management(os.path.dirname(fgdb), os.path.basename(fgdb))
 arcpy.pt.StageUtilityNetwork(fgdb,service_territory,dataset,un) 
 
+# 创建域网络
 arcpy.AddDomainNetwork_un(un,domainNet,"PARTITIONED","SOURCE",domainNetAlias)
 
 # 子类由un自动创建，只需要增加内容
@@ -40,7 +39,7 @@ for in_table, subtypes in domainNetSubtypes.items():  # items()是一个python�
     arcpy.SetDefaultSubtype_management(os.path.join(
         fgdb, dataset, in_table), 1)  # 如果默认子类不是1，这里还需要额外的输入参数
 
-#创建属性域,添加域值,分配给字段
+# 创建属性域,添加域值,分配给字段
 # 属性域名称:(描述，(从0开始各code的描述)) 注意ASSETTYPE，不要用别名会报错无效的属性域类型
 codedDomains = {'电压': ('电压类型', ('Unknown','高压','中压'))}
 assignDomainField = [('ElectricDevice', 'ASSETTYPE', '电压', ['1']), ('ElectricLine', 'ASSETTYPE', '电压', None)]
@@ -55,29 +54,25 @@ for domainField in assignDomainField:
 
 # ---------------------改到这里
 # 添加终端
-terConfig = {"DIRECTIONAL": ['A true;B true;C false','Top A-B;Bottom A-C', 'Bottom'], "DIRECTIONAL": ['A true;B true;C false','Top A-B;Bottom A-C','Top']}
-ter = {"EletricDevice":["变压器","高压"], "ElectricDevice":["变压器", "中压"]}
-for i, name in enumerate(terConfig):
-    arcpy.AddTerminalConfiguration_un(un,"'config'+str(i)",name[0],name[1],name[2])
-    for i, types in ter.items():
-        arcpy.SetTerminalConfiguration_un(un,domainNet,i,types[0],types[1],"'config'+str(i)")
-
+addTer = {"DIRECTIONAL": ['A true;B true;C false','Top A-B;Bottom A-C', 'Bottom'], "DIRECTIONAL": ['A true;B true;C false','Top A-B;Bottom A-C','Top']}
+setTer = {"EletricDevice":["变压器","高压"], "ElectricDevice":["变压器", "中压"]}
+for i, tername in enumerate(addTer):
+    arcpy.AddTerminalConfiguration_un(un,"'config'+str(i)",name[0],name[1],name[2]) 
+    # 终端名称以'config+数字'可以这样写，如果终端没有共性名称，得改变写法
+    for fc, types in setTer.items():
+        arcpy.SetTerminalConfiguration_un(un,domainNet,fc,types[0],types[1],"'config'+str(i)")
+        
 # 添加网络分组
-
-
-# # 添加终端
-# arcpy.AddTerminalConfiguration_un(un,"config1","DIRECTIONAL",'A true;B true;C false','Top A-B;Bottom A-C','Bottom')
-# arcpy.SetTerminalConfiguration_un(un,"Electric","ElectricDevice","变压器","高压","config1")
-
-# arcpy.AddTerminalConfiguration_un(un,"config2","DIRECTIONAL",'A true;B true;C false','Top A-B;Bottom A-C','Top')
-# arcpy.SetTerminalConfiguration_un(un,"Electric","ElectricDevice","变压器","中压","config2")
-
-# # 添加网络分组
-# arcpy.AddNetworkCategory_un(un, 'Protective')
-# arcpy.SetNetworkCategory_un(un, "Electric", "ElectricDevice", "变压器", "高压变压器","Protective")
-# arcpy.SetNetworkCategory_un(un, "Electric", "ElectricDevice", "变压器", "中压变压器","Protective")
-
-# # 创建关联关系
+netCategory = {"Protective":["ElectricDevice","变压器","高压变压器"], "Protective":["ElectiveDevice","变压器","中压变压器"]}
+for name, fc in netCategory.items():
+    arcpy.AddNetworkCategory_un(un,name) # 一个分组可以对应多个assettype,放在一个for循环会重复创建网络分组name
+    arcpy.SetNetworkCategory_un(un,*fc,name)
+    
+# 创建关联关系
+assoRole = {"JUNCTION_EDGE_CONNECTIVITY":{"none":["ElectricDevice","变压器","高压变压器"]},
+            "JUNCTION_EDGE_CONNECTIVITY":{"none":["ElectricLine","传输线","高压传输线"]},
+            }
+# 想法是基于关联关系，将两个assettype放在一个，资产类多的时候并不是通用写法，
 # arcpy.SetAssociationRole_un(un,"Electric","ElectricDevice","变压器","高压变压器","none","RESTRICTED")
 # arcpy.SetAssociationRole_un(un,"Electric","ElectricDevice","变压器","中压变压器","none","RESTRICTED")
 # arcpy.SetAssociationRole_un(un,"Electric","ElectricDevice","传输线","高压传输线","none","RESTRICTED")
@@ -86,7 +81,8 @@ for i, name in enumerate(terConfig):
 # # 设置线联通策略
 # arcpy.SetEdgeConnectivity_un(un, "Electric","ElectricLine", "传输线","高压传输线", "AnyVertex")
 
-# # 添加网络属性，这部分没理解，可选参数domain，是否要关联assettype的属性域
+
+# 添加网络属性，这部分没理解，可选参数domain，是否要关联assettype的属性域
 # arcpy.AddNetworkAttribute_un(un, "Device Status", "SHORT", "INLINE", "NOT_APPORTIONABLE","","变压器电压", "NOT_OVERRIDABLE")
 # arcpy.SetNetworkAttribute_un(un,"Device Status","Electric", "ElectricDevice","Asset type")
 
@@ -107,4 +103,3 @@ for i, name in enumerate(terConfig):
 
 # arcpy.Append_management(elebyq,"ElectricDevice","TEXT","变压器")
 # arcpy.Append_management(elecsx,"ElectricLine","TEXT","传输线")
-
