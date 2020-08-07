@@ -20,6 +20,8 @@ service_territory = "E:/ArcGIS/ele.gdb/Service_Area"
 dataset = "SYSTEM"
 un = "ElectricNetwork"
 domainNet,domainNetAlias = "Electric",'电网'
+elebyq = "E:/ArcGIS/ele.gdb/ele变压器"
+elecsx = "E:/ArcGIS/ele.gdb/ele传输线"
 
 arcpy.env.workspace = os.path.join(fgdb, dataset)
 
@@ -42,7 +44,8 @@ for in_table, subtypes in domainNetSubtypes.items():  # items()是一个python�
 # 创建属性域,添加域值,分配给字段
 # 属性域名称:(描述，(从0开始各code的描述)) 注意ASSETTYPE，不要用别名会报错无效的属性域类型
 codedDomains = {'电压': ('电压类型', ('Unknown','高压','中压'))}
-assignDomainField = [('ElectricDevice', 'ASSETTYPE', '电压', ['1']), ('ElectricLine', 'ASSETTYPE', '电压', None)]
+assignDomainField = [('E:/Eleun.gdb/ElectricDevice', 'ASSETTYPE',
+                      '电压', ['1']), ('E:/Eleun.gdb/ElectricLine', 'ASSETTYPE', '电压', None)]
 for codedDomainName, content in codedDomains.items():
     arcpy.CreateDomain_management(fgdb, codedDomainName, content[0],"SHORT","CODED")
     for i, name in enumerate(content[1]):   # enumerate是一个python字典的小技巧，同时返回序号(0,1,2...)和value
@@ -54,13 +57,12 @@ for domainField in assignDomainField:
 
 # ---------------------改到这里
 # 添加终端
-addTer = {"DIRECTIONAL": ['A true;B true;C false','Top A-B;Bottom A-C', 'Bottom'], "DIRECTIONAL": ['A true;B true;C false','Top A-B;Bottom A-C','Top']}
+addTer = {"config1": ['A True;B False;C False','Top A-B;Bottom A-C', 'Bottom'], "config2": ['A True;B False;C False','Top A-B;Bottom A-C','Top']}
 setTer = {"EletricDevice":["变压器","高压"], "ElectricDevice":["变压器", "中压"]}
-for i, tername in enumerate(addTer):
-    arcpy.AddTerminalConfiguration_un(un,"'config'+str(i)",name[0],name[1],name[2]) 
-    # 终端名称以'config+数字'可以这样写，如果终端没有共性名称，得改变写法
+for name, ter in addTer.items():
+    arcpy.AddTerminalConfiguration_un(un,name,"DIRECTIONAL",ter[0],ter[1],ter[2]) 
     for fc, types in setTer.items():
-        arcpy.SetTerminalConfiguration_un(un,domainNet,fc,types[0],types[1],"'config'+str(i)")
+        arcpy.SetTerminalConfiguration_un(un,domainNet,fc,types[0],types[1],name)
         
 # 添加网络分组
 netCategory = {"Protective":["ElectricDevice","变压器","高压变压器"], "Protective":["ElectiveDevice","变压器","中压变压器"]}
@@ -69,37 +71,42 @@ for name, fc in netCategory.items():
     arcpy.SetNetworkCategory_un(un,*fc,name)
     
 # 创建关联关系
-assoRole = {"JUNCTION_EDGE_CONNECTIVITY":{"none":["ElectricDevice","变压器","高压变压器"]},
-            "JUNCTION_EDGE_CONNECTIVITY":{"none":["ElectricLine","传输线","高压传输线"]},
+# 想法是基于关联关系,将两个assettype放在一个变量,资产类多的时候并不是通用写法。 就把role、rule分开设置
+assoRole = {"none":["ElectricDevice","变压器","高压变压器"],
+            "none":["ElectricLine","传输线","高压传输线"],
             }
-# 想法是基于关联关系，将两个assettype放在一个，资产类多的时候并不是通用写法，
-# arcpy.SetAssociationRole_un(un,"Electric","ElectricDevice","变压器","高压变压器","none","RESTRICTED")
-# arcpy.SetAssociationRole_un(un,"Electric","ElectricDevice","变压器","中压变压器","none","RESTRICTED")
-# arcpy.SetAssociationRole_un(un,"Electric","ElectricDevice","传输线","高压传输线","none","RESTRICTED")
-# arcpy.AddRule_un(un,"JUNCTION_EDGE_CONNECTIVITY","ElectricDevice","变压器","高压变压器","ElectricLine","传输线","高压传输线")
-# arcpy.AddRule_un(un,"JUNCTION_EDGE_CONNECTIVITY","ElectricDevice","传输线","高压传输线","ElectricLine","变压器","中压变压器")
-# # 设置线联通策略
-# arcpy.SetEdgeConnectivity_un(un, "Electric","ElectricLine", "传输线","高压传输线", "AnyVertex")
+addRule = {"JUNCTION_EDGE_CONNECTIVITY":[("ElectricDevice","变压器","高压变压器"),("EletricLine","传输线","高压传输线")],
+        "JUNCTION_EDGE_CONNECTIVITY":[("EletricDevice","传输线","高压传输线"),("EletricLine","变压器","中压变压器")]}
+eleLine = {"EletricLine":[("传输线","高压传输线")]}
+for role, fc in assoRole.items():
+    arcpy.SetAssociationRole_un(un,domainNet,*fc,name,"RESTRICTED")
+for rulename, fc in addRule.items():
+    arcpy.AddRule_un(un,rulename,*fc[0],*fc[1])  
+for line, linetype in eleLine.items():
+    arcpy.SetEdgeConnectivity_un(un,domainNet,line,*linetype[0],"AnyVertex")
 
+# 添加网络属性，这部分没理解，可选参数domain，是否要关联assettype的属性域, 网络属性的用途有点想象不出来,创建un启用拓扑
+netattr = {"Devices Ststus":["ElectricDevice","ASSETTYPE","电压"]}
+for name, attr in netattr.items():
+    arcpy.AddNetworkAttribute_un(un,name,"SHORT","INLINE","NOT_APP","attr[2]","NOT_OVEREIDABLE")
+    arcpy.SetNetworkAttribute_un(un,name,domainNet,attr[0],attr[1])
 
-# 添加网络属性，这部分没理解，可选参数domain，是否要关联assettype的属性域
-# arcpy.AddNetworkAttribute_un(un, "Device Status", "SHORT", "INLINE", "NOT_APPORTIONABLE","","变压器电压", "NOT_OVERRIDABLE")
-# arcpy.SetNetworkAttribute_un(un,"Device Status","Electric", "ElectricDevice","Asset type")
+# 添加层
+tier = {"高压层":["1","RADIAL"],"中压层":["1","MESH"]}
+for name, rank_type in tier.items():
+    arcpy.AddTier_un(un,domainNet,name,rank_type[0],rank_type[1])
 
-# # 添加层
-# arcpy.AddTier_un(un,"Electric","高压区",1,"RADIAL")
+#设置子网定义
+valid_devices = "'变压器/高压'；'变压器/中压'"
+valid_lines = "'传输线/高压'"
+valid_subnetwork_controller = "变压器/高压'；'变压器/中压'"
+aggregated_line = "'传输线/高压'"
+diagram_template = "Basic"
+arcpy.SetSubnetworkDefinition_un(un,domainNet,"高压区","SUPPORT_DISJOINT",
+                                valid_devices,valid_subnetwork_controller,valid_lines,aggregated_line,diagram_template,
+                                include_barriers="INCLUDE_BARRIERS",traversability_scope="BOTH_JUNCTIONS_AND_EDGES")
 
-# #设置子网定义
-# valid_devices = "'变压器/高压'；'变压器/中压'"
-# valid_lines = "'传输线/高压'"
-# valid_subnetwork_controller = "变压器/高压'；'变压器/中压'"
-# aggregated_line = "'传输线/高压'"
-# diagram_template = "Basic"
-# arcpy.SetSubnetworkDefinition_un(un,"Electric","高压区","SUPPORT_DISJOINT",
-#                                 valid_devices,valid_subnetwork_controller,valid_lines,aggregated_line,diagram_template,
-#                                 include_barriers="INCLUDE_BARRIERS",traversability_scope="BOTH_JUNCTIONS_AND_EDGES")
-
-# # 添加要素
-
-# arcpy.Append_management(elebyq,"ElectricDevice","TEXT","变压器")
-# arcpy.Append_management(elecsx,"ElectricLine","TEXT","传输线")
+# 添加要素
+featureClass = {elebyq:["EletricDevice","变压器"],elecsx:["EletricLine","传输线"]}
+for fc, fc_type in featureClass.items():
+    arcpy.Append_management(fc,fc_type[0],"TEXT",fc_type[1])
