@@ -1,0 +1,171 @@
+{
+    "feaDS": "SYSTEM",
+    "unName": "ElectricNetwork",
+    "territoryFeaCls": "E:/MyStudy/untilityNet/大陵馈线.gdb/serviceTerritory",
+    "assetsCSV": "C:/Users/admin/Desktop/assets.csv",
+    "rulesCSV": "C:/Users/admin/Desktop/rules.csv",
+    "fieldDomains": [
+        {
+            "name": "VoltageLevel",
+            "desc": "电压级别",
+            "ftype": "SHORT",
+            "dtype": "CODED",
+            "values": [
+                {
+                    "code": 0,
+                    "name": "Unknown"
+                },
+                {
+                    "code": 1,
+                    "name": "高压"
+                },
+                {
+                    "code": 2,
+                    "name": "中压"
+                }
+            ]
+        },
+        {
+            "name": "TransformerType",
+            "desc": "变压器类型",
+            "values": [
+                {
+                    "code": 0,
+                    "name": "Unknown"
+                },
+                {
+                    "code": 1,
+                    "name": "高压-中压"
+                },
+                {
+                    "code": 2,
+                    "name": "中压-低压"
+                }
+            ]
+        },
+        {
+            "name": "SymbolRotation",
+            "desc": "符号旋转角度",
+            "dtype": "RANGE",
+            "ftype": "SHORT",
+            "min": 0,
+            "max": 359
+        }
+    ],
+    "terminalConfigs": [
+        {
+            "name": "一进二出",
+            "dir": "DIRECTIONAL",
+            "terminals": "A true;B false;C false",
+            "paths": "降压1 A-B;降压2 A-C",
+            "default": "降压1"
+        }
+    ],
+    "categories": [
+        "高压",
+        "中压"
+    ],
+    "netAttributes": [
+        {
+            "name": "Phases Current",
+            "type": "SHORT",
+            "inline": "NOT_INLINE",
+            "apportionable": "NOT_APPORTIONABLE",
+            "domain": "",
+            "overridable": "",
+            "nullable": "",
+            "substitution": "",
+            "attrToSubstitution": ""
+        }
+    ],
+    "domainNetworks": [
+        {
+            "name": "Electric",
+            "alias": "电网",
+            "tierDef": "PARTITIONED",
+            "controllerType": "SOURCE",
+            "subtypes": [
+                {
+                    "feaCls": "ElectricDevice",
+                    "default": 1,
+                    "values": [
+                        {
+                            "code": 1,
+                            "name": "变压器"
+                        }
+                    ]
+                },
+                {
+                    "feaCls": "ElectricLine",
+                    "default": 1,
+                    "values": [
+                        {
+                            "code": 1,
+                            "name": "传输线"
+                        }
+                    ]
+                }
+            ],
+            "newFields": [
+                {
+                    "feaCls": "ElectricLine",
+                    "name": "PhasesCurrent",
+                    "type": "SHORT"
+                },
+                {
+                    "feaCls": "ElectricDevice",
+                    "name": "PhasesCurrent",
+                    "type": "SHORT"
+                }
+            ],
+            "fieldDomains": [
+                {
+                    "feaCls": "ElectricDevice",
+                    "fieldName": "ASSETTYPE",
+                    "domainName": "TransformerType",
+                    "default": 1,
+                    "subtypeCodes": [
+                        1
+                    ]
+                },
+                {
+                    "feaCls": "ElectricLine",
+                    "fieldName": "ASSETTYPE",
+                    "domainName": "VoltageLevel",
+                    "default": 2,
+                    "subtypeCodes": 1
+                }
+            ],
+            "tierGroups": [],
+            "tiers": [
+                {
+                    "name": "中压区",
+                    "rank": 1,
+                    "topo": "MESH",
+                    "groupName": "",
+                    "subnetField": "",
+                    "disjoint": "SUPPORT_DISJOINT",
+                    "devices": "'变压器/高压-中压'",
+                    "controllers": "'变压器/高压-中压'",
+                    "lines": "'传输线/中压'",
+                    "aggregated": "'传输线/中压'",
+                    "diagrams": "Basic",
+                    "barriers": "INCLUDE_BARRIERS",
+                    "traverse": "BOTH_JUNCTIONS_AND_EDGES"
+                }
+            ],
+            "netAttributes": [
+                {
+                    "name": "Phases Current",
+                    "fields": [
+                        "ElectricLine/PhasesCurrent",
+                        "ElectricDevice/PhasesCurrent"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Structure"
+        }
+    ]
+}

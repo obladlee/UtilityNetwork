@@ -1,0 +1,4 @@
+domainNet,feaCls,assetName,categories,terminalCfg,edgeConnectivity,roleType,deletionType,viewScale,splitType
+Electric,ElectricDevice,变压器/高压-中压,高压;中压;Subnetwork Controller,一进二出,,,,,
+Electric,ElectricLine,传输线/高压,高压,,,,,,
+Electric,ElectricLine,传输线/中压,中压,,,,,,

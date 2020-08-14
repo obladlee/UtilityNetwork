@@ -1,0 +1,111 @@
+{
+    "feaDS": "SYSTEM",
+    "unName": "ElectricNetwork",
+    "serviceTerritory": "E:/MyStudy/untilityNet/大陵馈线.gdb/serviceTerritory",
+    "fieldDomains": [
+        {
+            "name": "VoltageLevel",
+            "desc": "电压级别",
+            "ftype": "SHORT",
+            "dtype": "CODED",
+            "values": [
+                {
+                    "code": 0,
+                    "name": "Unknown"
+                },
+                {
+                    "code": 1,
+                    "name": "高压"
+                },
+                {
+                    "code": 2,
+                    "name": "中压"
+                }
+            ]
+        },
+        {
+            "name": "TransformerType",
+            "desc": "变压器类型",
+            "values": [
+                {
+                    "code": 0,
+                    "name": "Unknown"
+                },
+                {
+                    "code": 1,
+                    "name": "高压-中压"
+                },
+                {
+                    "code": 2,
+                    "name": "中压-低压"
+                }
+            ]
+        }
+    ],
+    "terminalConfigs": [
+        {
+            "name": "一进二出",
+            "dir": "DIRECTIONAL",
+            "terminals": "A true;B false;C false",
+            "paths": "降压1 A-B;降压2 A-C",
+            "default": "降压1"
+        }
+    ],
+    "domainNetworks": [
+        {
+            "name": "Electric",
+            "alias": "电网",
+            "tierDef": "PARTITIONED",
+            "controllerType": "SOURCE",
+            "subtypes": [
+                {
+                    "feaCls": "ElectricDevice",
+                    "default": 1,
+                    "values": [
+                        {
+                            "code": 1,
+                            "name": "变压器"
+                        }
+                    ]
+                },
+                {
+                    "feaCls": "ElectricLine",
+                    "default": 1,
+                    "values": [
+                        {
+                            "code": 1,
+                            "name": "传输线"
+                        }
+                    ]
+                }
+            ],
+            "fieldDomains": [
+                {
+                    "feaCls": "ElectricDevice",
+                    "fieldName": "ASSETTYPE",
+                    "domainName": "TransformerType",
+                    "default": 1,
+                    "subtypeCodes": [
+                        1
+                    ]
+                },
+                {
+                    "feaCls": "ElectricLine",
+                    "fieldName": "ASSETTYPE",
+                    "domainName": "VoltageLevel",
+                    "default": 2,
+                    "subtypeCodes": 1
+                }
+            ],
+            "terminalConfigs": [
+                {
+                    "asset": "变压器:高压-中压",
+                    "tcfgName": "一进二出"
+                }
+            ]
+        },
+        {
+            "name": "Structure"
+        }
+    ]
+}
