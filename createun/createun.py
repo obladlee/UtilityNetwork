@@ -9,7 +9,7 @@ import json
 import csv
 from collections import namedtuple
 
-def createUN(jsonFile, outGDB):
+def createUN(jsonFile, outGDB, ):
     cfgStr = open(jsonFile, 'r', encoding='gbk').read()
     unObj = json.loads(cfgStr)
     unName = unObj["unName"]
@@ -24,11 +24,11 @@ def createUN(jsonFile, outGDB):
     # 导入fieldDomains，domain是面向GDB级的物理设置
     for domain in unObj["fieldDomains"]:
         dName = domain["name"]
-        if domain.get("dtype") == "RANGE":
+        if domain.get("dtype") == "RANGE": 
             arcpy.CreateDomain_management(outGDB, dName, domain.get("desc",dName), domain.get("ftype","SHORT"), "RANGE")
             arcpy.SetValueForRangeDomain_management(outGDB, dName, domain['min'], domain['max'])
             continue
-        table = arcpy.management.CreateTable('in_memory', dName)[0]
+        table = arcpy.management.CreateTable('in_memory', dName)[0] # ？[0]
         arcpy.AddField_management(table, 'code', domain.get("ftype","SHORT"))
         arcpy.AddField_management(table, 'name', 'TEXT', field_length=254)
         with arcpy.da.InsertCursor(table, ('code','name')) as cur:
@@ -39,7 +39,7 @@ def createUN(jsonFile, outGDB):
     
     # 创建除了structure以外的域网络
     for dnObj in unObj["domainNetworks"]:
-        if dnObj["name"].lower() != "structure":
+        if dnObj["name"].lower() != "structure": 
             arcpy.AddDomainNetwork_un(unName, dnObj["name"], dnObj["tierDef"], dnObj["controllerType"], dnObj.get("alias"))
 
     # 添加TerminalConfiguration,categories,netAttributes，这些是面向整个UN级的逻辑设置
@@ -55,7 +55,7 @@ def createUN(jsonFile, outGDB):
                     terminals_bidirectional=terminalCfg["terminals"], valid_paths=terminalCfg["paths"], default_path=terminalCfg.get("default"))
     # TODO: 网络分组与分层的区别?
     categories = unObj.get("categories")
-    if categories:
+    if categories: ## 为什么加这种判断
         for category in categories:
             arcpy.AddNetworkCategory_un(unName, category)
     # TODO：网络属性的可选设置有什么作用？
