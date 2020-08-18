@@ -9,7 +9,7 @@ import json
 import csv
 from collections import namedtuple
 
-def createUN(jsonFile, outGDB, ):
+def createUN(jsonFile, outGDB,):
     cfgStr = open(jsonFile, 'r', encoding='gbk').read()
     unObj = json.loads(cfgStr)
     unName = unObj["unName"]
@@ -139,7 +139,12 @@ def createUN(jsonFile, outGDB, ):
 
     # TODO: 导入rule
     # TODO: 导入数据
-
+    for dnObj in unObj["domainNetworks"]:
+        subtypes = dnObj.get("subtypes")
+        if subtypes:
+            for subtype in subtypes:
+                for v in subtype["values"]:
+                    arcpy.Append_management("",subtype["feaClas"],"TEXT",v["name"])
     # TODO: 导入关联关系
     # TODO: 导入子网控制器
     
