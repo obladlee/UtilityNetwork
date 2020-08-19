@@ -9,7 +9,7 @@ import json
 import csv
 from collections import namedtuple
 
-def createUN(jsonFile, outGDB,):
+def createUN(jsonFile, outGDB):
     cfgStr = open(jsonFile, 'r', encoding='gbk').read()
     unObj = json.loads(cfgStr)
     unName = unObj["unName"]
@@ -17,7 +17,7 @@ def createUN(jsonFile, outGDB,):
     arcpy.env.preserveGlobalIds = True
     arcpy.env.overwriteOutput = True
     arcpy.CreateFileGDB_management(os.path.dirname(outGDB), os.path.basename(outGDB))
-    arcpy.pt.StageUtilityNetwork(outGDB,unObj["territoryFeaCls"],unObj["feaDS"],unName)
+    arcpy.pt.StageUtilityNetwork(outGDB,unObj.get("territoryFeaCls"),unObj["feaDS"],unName)
     # Tips:尽量使用相对路径，如有工具不支持再改用绝对路径
     arcpy.env.workspace = os.path.join(outGDB, unObj["feaDS"])
     
@@ -101,7 +101,7 @@ def createUN(jsonFile, outGDB,):
 
     # 为资产指定多项配置：端子配置、分组、边连通性、角色，这些是面向资产级的逻辑设置
     with open(unObj["assetsCSV"], 'r', encoding='gbk') as fp:
-        reader = csv.reader(fp)
+        reader = csv.reader(fp) # 读取列为列表
         header = next(reader)   # ['domainNet', 'feaCls', 'assetName', 'categories', 'terminalCfg', 'edgeConnectivity', 'roleType', 'deletionType', 'viewScale', 'splitType']
         assetCfg = namedtuple('assetCfg', header)
         for row in reader:
@@ -111,7 +111,7 @@ def createUN(jsonFile, outGDB,):
                 arcpy.SetTerminalConfiguration_un(unName, row.domainNet, row.feaCls, *asset, row.terminalCfg)
             if row.categories:
                 arcpy.SetNetworkCategory_un(unName, row.domainNet, row.feaCls, *asset, row.categories)
-            if row.edgeConnectivity:
+            if row.edgeConnectivity: # 边联通非空
                 arcpy.SetEdgeConnectivity_un(unName, row.domainNet, row.feaCls, *asset, row.edgeConnectivity)
             if row.roleType:
                 arcpy.SetAssociationRole_un(unName, row.domainNet, row.feaCls, *asset, row.roleType, row.deletionType, row.viewScale, row.splitType)
@@ -139,16 +139,19 @@ def createUN(jsonFile, outGDB,):
 
     # TODO: 导入rule
     # TODO: 导入数据
+    # 数据导入是基于子类的，把要素类路径写入到子类中
     for dnObj in unObj["domainNetworks"]:
         subtypes = dnObj.get("subtypes")
         if subtypes:
             for subtype in subtypes:
                 for v in subtype["values"]:
-                    arcpy.Append_management("",subtype["feaClas"],"TEXT",v["name"])
+                    arcpy.Append_management(subtype["path"],subtype["feaClas"],"TEXT",v["name"])
     # TODO: 导入关联关系
     # TODO: 导入子网控制器
+    arcpy.ExportSubnetworkControllers_un(unName,"E:/ArcGIS/unnet/subnetwork_controllers.csv")
+    arcpy.ImportSubnetworkControllers_un(unName,"E:/ArcGIS/unnet/subnetwork_controllers.csv")
     
 
 if __name__ == "__main__":
-    createUN(r"C:\Users\admin\Desktop\demoUN.json", r"E:\MyStudy\untilityNet\elecDemo.gdb")
+    createUN(r"E:\ArcGIS\unnet\demoUN.json", r"E:\ArcGIS\unnet\elecDemo.gdb")
     

@@ -1,9 +1,9 @@
 {
     "feaDS": "SYSTEM",
     "unName": "ElectricNetwork",
-    "territoryFeaCls": "E:/MyStudy/untilityNet/大陵馈线.gdb/serviceTerritory",
-    "assetsCSV": "C:/Users/admin/Desktop/assets.csv",
-    "rulesCSV": "C:/Users/admin/Desktop/rules.csv",
+    "territoryFeaCls": "E:/ArcGIS/unnet/ele.gdb/Service_Area",
+    "assetsCSV": "E:/ArcGIS/unnet/assets.csv",
+    "rulesCSV": "E:/ArcGIS/unnet/rules.csv",
     "fieldDomains": [
         {
             "name": "VoltageLevel",
@@ -88,16 +88,19 @@
                 {
                     "feaCls": "ElectricDevice",
                     "default": 1,
+                    "path": "E:/ArcGIS/unnet/ele.gdb/ele变压器",
                     "values": [
                         {
                             "code": 1,
                             "name": "变压器"
                         }
                     ]
+                    
                 },
                 {
                     "feaCls": "ElectricLine",
                     "default": 1,
+                    "path": "E:/ArcGIS/unnet/ele.gdb/ele传输线",
                     "values": [
                         {
                             "code": 1,
