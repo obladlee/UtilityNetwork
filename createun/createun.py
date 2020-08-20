@@ -147,6 +147,7 @@ def createUN(jsonFile, outGDB):
                 for v in subtype["values"]:
                     arcpy.Append_management(subtype["path"],subtype["feaClas"],"TEXT",v["name"])
     # TODO: 导入关联关系
+
     # TODO: 导入子网控制器
     arcpy.ExportSubnetworkControllers_un(unName,"E:/ArcGIS/unnet/subnetwork_controllers.csv")
     arcpy.ImportSubnetworkControllers_un(unName,"E:/ArcGIS/unnet/subnetwork_controllers.csv")
