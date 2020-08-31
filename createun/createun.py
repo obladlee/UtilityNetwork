@@ -17,7 +17,7 @@ def createUN(jsonFile, outGDB):
     arcpy.env.preserveGlobalIds = True
     arcpy.env.overwriteOutput = True
     arcpy.CreateFileGDB_management(os.path.dirname(outGDB), os.path.basename(outGDB))
-    arcpy.pt.StageUtilityNetwork(outGDB,unObj.get("territoryFeaCls"),unObj["feaDS"],unName)
+    arcpy.pt.StageUtilityNetwork(outGDB,unObj["territoryFeaCls"],unObj["feaDS"],unName)
     # Tips:尽量使用相对路径，如有工具不支持再改用绝对路径
     arcpy.env.workspace = os.path.join(outGDB, unObj["feaDS"])
     
@@ -100,7 +100,7 @@ def createUN(jsonFile, outGDB):
                         arcpy.SetNetworkAttribute_un(unName, attribute["name"], dnObj["name"], fc, fName)
 
     # 为资产指定多项配置：端子配置、分组、边连通性、角色，这些是面向资产级的逻辑设置
-    with open(unObj["assetsCSV"], 'r', encoding='gbk') as fp:
+    with open(unObj.get("assetsCSV","not exist"), 'r', encoding='gbk') as fp:
         reader = csv.reader(fp) # 读取列为列表
         header = next(reader)   # ['domainNet', 'feaCls', 'assetName', 'categories', 'terminalCfg', 'edgeConnectivity', 'roleType', 'deletionType', 'viewScale', 'splitType']
         assetCfg = namedtuple('assetCfg', header)
@@ -145,7 +145,7 @@ def createUN(jsonFile, outGDB):
         if subtypes:
             for subtype in subtypes:
                 for v in subtype["values"]:
-                    arcpy.Append_management(subtype["path"],subtype["feaClas"],"TEXT",v["name"])
+                    arcpy.Append_management(subtype["path"],subtype["feaCls"],"TEST",v["name"])
     # TODO: 导入关联关系
 
     # TODO: 导入子网控制器
