@@ -145,7 +145,7 @@ def createUN(jsonFile, outGDB):
         if subtypes:
             for subtype in subtypes:
                 for v in subtype["values"]:
-                    arcpy.Append_management(subtype["path"],subtype["feaCls"],"TEST",v["name"])
+                    arcpy.Append_management(subtype["path"],subtype["feaCls"],"NOT_TEST",v["name"])
     # TODO: 导入关联关系
 
     # TODO: 导入子网控制器
