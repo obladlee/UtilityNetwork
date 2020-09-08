@@ -138,19 +138,19 @@ def createUN(jsonFile, outGDB):
                                 tier.get("diagrams"),include_barriers=tier.get("barriers"),traversability_scope=tier.get("traverse"))
 
     # TODO: 导入rule
+    arcpy.ImportRules_un(unName,"All","E:/ArcGIS/unnet/rules.csv")
     # TODO: 导入数据
-    # 数据导入是基于子类的，把要素类路径写入到子类中
+    # 数据导入是基于子类的，把要素类路径写入到子类中，修改了demoUN域网络的子类型值
     for dnObj in unObj["domainNetworks"]:
         subtypes = dnObj.get("subtypes")
         if subtypes:
             for subtype in subtypes:
                 for v in subtype["values"]:
-                    arcpy.Append_management(subtype["path"],subtype["feaCls"],"NOT_TEST",v["name"])
+                    arcpy.Append_management(subtype["path"],subtype["feaCls"],"NO_TEST",subtype=v["name"])
     # TODO: 导入关联关系
 
     # TODO: 导入子网控制器
-    arcpy.ExportSubnetworkControllers_un(unName,"E:/ArcGIS/unnet/subnetwork_controllers.csv")
-    arcpy.ImportSubnetworkControllers_un(unName,"E:/ArcGIS/unnet/subnetwork_controllers.csv")
+    # arcpy.ImportSubnetworkControllers_un(unName,"E:/ArcGIS/unnet/subnetwork_controllers.csv")
     
 
 if __name__ == "__main__":
